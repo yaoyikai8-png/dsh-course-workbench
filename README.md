@@ -2,6 +2,10 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
+[![ci](https://github.com/yaoyikai8-png/dsh-course-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/yaoyikai8-png/dsh-course-workbench/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![DSH bundle](https://img.shields.io/badge/DSH-bundle-4f46e5)](https://github.com/deepseek-ai)
+
 A [DeepSeek Harness](https://github.com/deepseek-ai) (DSH) bundle that turns a folder of course
 slides into a study desk: one sidebar panel listing every course, plus `/outline`, `/notes` and
 `/review` commands and five skills that read your `.pptx` / `.pdf` / `.docx` courseware and write

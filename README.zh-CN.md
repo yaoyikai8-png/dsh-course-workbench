@@ -2,6 +2,10 @@
 
 [English](README.md) · **简体中文**
 
+[![ci](https://github.com/yaoyikai8-png/dsh-course-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/yaoyikai8-png/dsh-course-workbench/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![DSH bundle](https://img.shields.io/badge/DSH-bundle-4f46e5)](https://github.com/deepseek-ai)
+
 一个 [DeepSeek Harness](https://github.com/deepseek-ai)（DSH）bundle：把「一个装满课件的文件夹」
 变成一张学习台。侧边栏多一个「课程」面板，列出每门课的课件、更新时间和最新文件；再配
 `/outline`、`/notes`、`/review` 三条命令和五个技能，读你的 `.pptx` / `.pdf` / `.docx` 课件，
