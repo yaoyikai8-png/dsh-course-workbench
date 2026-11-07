@@ -14,19 +14,7 @@ Markdown + PDF deliverables into the course folder.
 Built for a marine-geoscience undergrad at Tongji University, but nothing in it is
 course-specific — point it at any folder where each subfolder is one course.
 
-```text
-┌ 课程 ────────────────────────────────────────────┐
-│ courses                            [刷新] [＋新增项目] │
-│ ───────────────────────────────────────────────── │
-│ 海洋地质学          24 份课件 · 3 个子文件夹        │
-│   最新：第8讲-深海沉积.pptx  11/06 20:14            │
-│   [打开课件]  [期末复习]                            │
-│                                                   │
-│ 古海洋与古环境       46 份课件 · 1 个子文件夹        │
-│   最新：第12讲-碳循环.pdf     11/05 09:31            │
-│   [打开课件]  [期末复习]                            │
-└───────────────────────────────────────────────────┘
-```
+![Course panel: eight course cards, each with its courseware count, newest files and 打开课件 / 期末复习 buttons](docs/panel.png)
 
 ## What it does
 
