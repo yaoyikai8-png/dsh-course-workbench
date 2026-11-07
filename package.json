@@ -16,12 +16,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yaoyika8-png/dsh-course-workbench.git"
+    "url": "git+https://github.com/yaoyikai/dsh-course-workbench.git"
   },
   "bugs": {
-    "url": "https://github.com/yaoyika8-png/dsh-course-workbench/issues"
+    "url": "https://github.com/yaoyikai/dsh-course-workbench/issues"
   },
-  "homepage": "https://github.com/yaoyika8-png/dsh-course-workbench#readme",
+  "homepage": "https://github.com/yaoyikai/dsh-course-workbench#readme",
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
