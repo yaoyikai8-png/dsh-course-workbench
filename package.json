@@ -1,0 +1,57 @@
+{
+  "name": "tongji-course-workbench",
+  "version": "0.1.0",
+  "description": "DSH course workbench: a sidebar panel for your course folders plus /outline, /notes and /review commands and five study skills (notes, outline, final review, lecture digest, homework).",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "course",
+    "study",
+    "notes",
+    "exam-review",
+    "tongji"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaoyika8-png/dsh-course-workbench.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yaoyika8-png/dsh-course-workbench/issues"
+  },
+  "homepage": "https://github.com/yaoyika8-png/dsh-course-workbench#readme",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "skills",
+    "tools",
+    "scripts"
+  ],
+  "scripts": {
+    "test": "node smoke-client.mjs",
+    "check": "node --check index.js && node --check client.js && node smoke-client.mjs",
+    "install:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-locale"]
+    }
+  }
+}

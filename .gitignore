@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build / test output
+*.log
+coverage/
+dist/
+
+# editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# local overrides — keep your real courseRoot out of git
+cordis.patch.local.yml
+.env
+.env.*

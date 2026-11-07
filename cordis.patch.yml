@@ -1,0 +1,13 @@
+# 课程工作台 bundle 补丁：往 profile 里插一行插件配置。
+#
+# courseRoot 指向「放课程的文件夹」——它下面每个子文件夹算一门课。
+# 装上之后请把它改成你自己的路径，例如：
+#   Windows:  'D:\courses'      或  'C:\Users\you\Documents\courses'
+#   macOS:    '/Users/you/courses'
+# 不填也能用：面板会退回到 ~/Documents/courses，并在面板里提示目录不存在。
+- insert:
+    - id: tongji-course-workbench
+      name: 'tongji-course-workbench'
+      config:
+        # 课程根目录：每个子文件夹 = 一门课 = 一个 DSH 项目
+        courseRoot: 'C:\Users\you\Documents\courses'

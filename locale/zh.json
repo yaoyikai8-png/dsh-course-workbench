@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "课程工作台",
+    "description": "在侧边栏新增“课程”面板：一览本学期各课程的课件与最新文件，并可一键进入课程项目。配套技能：course-review（复习备考）、course-digest（课件消化）、course-assignment（作业助手）。"
+  }
+}
