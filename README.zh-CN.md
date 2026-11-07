@@ -48,7 +48,7 @@
 ## 安装
 
 ```powershell
-git clone https://github.com/yaoyikai/dsh-course-workbench.git
+git clone https://github.com/yaoyikai8-png/dsh-course-workbench.git
 cd dsh-course-workbench
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1
 ```
