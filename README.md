@@ -73,8 +73,11 @@ courses:
         courseRoot: 'D:\courses'   # each subfolder = one course
 ```
 
-Finally hard-refresh the web UI (`Ctrl+Shift+R`) and look for the graduation-cap icon in the
-left sidebar. Any folder of courses can also be added later from the panel with **＋ 新增项目**.
+Finally hard-refresh the web UI (`Ctrl+Shift+R`) and look for **课程** in the left sidebar:
+
+<img src="docs/sidebar-entry.png" width="300" alt="课程 entry in the DSH sidebar">
+
+Any folder of courses can also be added later from the panel with **＋ 新增项目**.
 
 ## Using it
 

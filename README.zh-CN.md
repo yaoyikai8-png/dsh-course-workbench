@@ -71,8 +71,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install.ps1
         courseRoot: 'D:\courses'   # 每个子文件夹 = 一门课
 ```
 
-最后硬刷新页面（`Ctrl+Shift+R`），左侧边栏会出现毕业帽图标。以后新加的课程文件夹也可以
-在面板里用 **＋ 新增项目** 直接选进来。
+最后硬刷新页面（`Ctrl+Shift+R`），左侧边栏会出现 **课程** 这一项：
+
+<img src="docs/sidebar-entry.png" width="300" alt="DSH 侧边栏里的课程入口">
+
+以后新加的课程文件夹也可以在面板里用 **＋ 新增项目** 直接选进来。
 
 ## 怎么用
 
