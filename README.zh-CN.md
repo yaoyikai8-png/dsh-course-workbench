@@ -39,6 +39,12 @@
 
 ## 安装
 
+**不想碰命令行？** 去 [Releases](https://github.com/yaoyikai8-png/dsh-course-workbench/releases/latest)
+下载 zip，解压，**双击 `install.bat`** 就行——它跑的就是下面这几步，装完窗口不会自动关，
+方便你看结果。
+
+会用 git 的话：
+
 ```powershell
 git clone https://github.com/yaoyikai8-png/dsh-course-workbench.git
 cd dsh-course-workbench

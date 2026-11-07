@@ -40,6 +40,12 @@ the preview renders; the PDF is what you print.
 
 ## Install
 
+**No git?** Download the ZIP from [Releases](https://github.com/yaoyikai8-png/dsh-course-workbench/releases/latest),
+unzip it, and double-click `install.bat`. It runs the same steps below and keeps the window open
+so you can read the result.
+
+With git:
+
 ```powershell
 git clone https://github.com/yaoyikai8-png/dsh-course-workbench.git
 cd dsh-course-workbench
