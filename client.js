@@ -861,23 +861,19 @@ window.__ModuleLoader__.load({
        * courseware right here. `openWorkspace` reveals the conversation, so the
        * panel is selected again afterwards — one click lands on the file list.
        */
+      /**
+       * Enter one course: show its courseware right here.
+       *
+       * This is a browse-only step. It deliberately does not touch the
+       * Workspace registry — a course folder only becomes a project once the
+       * user asks for real work (generate a note, or ask a question), so the
+       * sidebar does not grow an entry for every course someone glanced at.
+       */
       const openCourse = (course, mode) => {
         setOpenError('');
         setActivePath(course.path);
         setActiveMode(mode);
-        if (course.sessionId) {
-          showPanel(PANEL_ID);
-          return;
-        }
-        Promise.resolve(adoptCourse(course, uiWorkspace))
-          .then(() => {
-            showPanel(PANEL_ID);
-            setTimeout(load, 1200);
-          })
-          .catch((error) => {
-            setActivePath('');
-            setOpenError(`${course.name}: ${String((error && error.message) || error)}`);
-          });
+        showPanel(PANEL_ID);
       };
 
       const editRoot = (action, path) => {
@@ -1486,10 +1482,23 @@ window.__ModuleLoader__.load({
         setSelected(next);
       };
 
-      const generate = () => {
-        if (chosen.length === 0) return;
-        setBusy(true);
-        setNotice(null);
+      /**
+       * Create the course's project on demand.
+       *
+       * Browsing courseware needs no Session — the file list comes from the
+       * Host — so opening a course must not register a Workspace. Only a real
+       * generation does, and by then the Session is unavoidable.
+       *
+       * `openWorkspace` resolves before the Host has indexed the new agent, so
+       * the caller still has to tolerate a `no-session` answer for a moment.
+       */
+      const ensureSession = () => {
+        if (course.sessionId) return Promise.resolve();
+        return Promise.resolve(adoptCourse(course, uiWorkspace));
+      };
+
+      /** POST the ticked files, retrying while the fresh Session propagates. */
+      const dispatch = (attempt) => {
         fetch(GENERATE_URL, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -1497,6 +1506,15 @@ window.__ModuleLoader__.load({
         })
           .then((response) => response.json())
           .then((data) => {
+            if (
+              data &&
+              !data.ok &&
+              data.error === 'no-session' &&
+              attempt < 8
+            ) {
+              setTimeout(() => dispatch(attempt + 1), 700);
+              return;
+            }
             setBusy(false);
             if (data && data.ok) {
               setNotice({ kind: 'ok', text: `${tr(t, 'noticeOk')} ${data.target}` });
@@ -1519,6 +1537,22 @@ window.__ModuleLoader__.load({
           .catch(() => {
             setBusy(false);
             setNotice({ kind: 'err', text: `${tr(t, 'noticeErr')} network` });
+          });
+      };
+
+      /** Generate: create the project first, but only when work is requested. */
+      const generate = () => {
+        if (chosen.length === 0) return;
+        setBusy(true);
+        setNotice(null);
+        ensureSession()
+          .then(() => dispatch(0))
+          .catch((error) => {
+            setBusy(false);
+            setNotice({
+              kind: 'err',
+              text: `${tr(t, 'noticeErr')} ${String((error && error.message) || error)}`,
+            });
           });
       };
 

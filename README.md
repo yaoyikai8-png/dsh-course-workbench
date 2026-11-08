@@ -75,9 +75,10 @@ Any folder of courses can also be added later from the panel with **＋ 新增�
 
 ## Using it
 
-1. **Panel → course card → 打开课件.** First click creates a DSH project + session for that
-   course folder; later clicks go straight to the file list.
-2. **Tick files → 生成笔记.** The host hands exactly those paths to the course's session.
+1. **Panel → course card → 打开课件.** This only shows that course's files. No DSH project is
+   created, so browsing leaves the workspace list untouched.
+2. **Tick files → 生成笔记.** This is where a project is registered for the course folder, and the
+   host hands exactly those paths to its session.
 3. **Panel → 笔记 tab.** Every generated file is grouped under its course; click to preview.
 4. **提问** next to a note opens (or creates) the course's Q&A conversation and pins the note in
    the right sidebar.

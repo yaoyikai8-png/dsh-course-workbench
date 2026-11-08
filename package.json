@@ -1,6 +1,6 @@
 {
   "name": "tongji-course-workbench",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH course workbench: a sidebar panel for your course folders plus /outline, /notes and /review commands and five study skills (notes, outline, final review, lecture digest, homework).",
   "type": "module",
   "license": "MIT",

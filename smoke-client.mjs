@@ -51,10 +51,14 @@ const React = {
 };
 
 const registered = [];
+const openedWorkspaces = [];
 const openedSessions = [];
 const openedResources = [];
 const renamed = [];
 const sentPrompts = [];
+// Browsing a course must leave the Workspace registry alone; only real work
+// is allowed to register one.
+const workspaceCreates = [];
 const ctx = {
   effect(fn) {
     const dispose = fn();
@@ -67,14 +71,19 @@ const ctx = {
     }
     if (deps.includes('uiWorkspace')) {
       scoped.uiWorkspace = {
-        openWorkspace: async () => {},
+        openWorkspace: async (id) => { openedWorkspaces.push(id); },
         openSession: (id) => openedSessions.push(id),
         connectWorkspace: async () => 'session-new',
         startSession: () => {},
       };
     }
     if (deps.includes('workspaces')) {
-      scoped.workspaces = { create: async () => ({ workspaceId: 'ws-new' }) };
+      scoped.workspaces = {
+        create: async (input) => {
+          workspaceCreates.push(input.path);
+          return { workspaceId: 'ws-new' };
+        },
+      };
     }
     if (deps.includes('sessions')) {
       // A freshly created Session has no borrowed binding — only `using`
@@ -182,6 +191,26 @@ const overviewPayload = {
         latestFiles: [],
         lastModified: '',
       },
+      {
+        // Has courseware but no project yet: the case the "create a workspace
+        // only when real work is asked for" rule is about.
+        name: '无会话课程',
+        path: 'C:\\courses\\无会话课程',
+        courseFileCount: 1,
+        files: [
+          {
+            name: '第2讲.pptx',
+            path: 'C:\\courses\\无会话课程\\第2讲.pptx',
+            dir: '',
+            ext: 'pptx',
+            mtime: '2026-11-03T00:00:00.000Z',
+            sizeKB: 88,
+          },
+        ],
+        subfolders: [],
+        latestFiles: [{ name: '第2讲.pptx', mtime: '2026-11-03T00:00:00.000Z', sizeKB: 88 }],
+        lastModified: '2026-11-03T00:00:00.000Z',
+      },
   ],
 };
 
@@ -194,6 +223,16 @@ globalThis.fetch = async (url, init) => {
     return {
       ok: true,
       json: async () => ({ ok: true, sessionId: created ? 'session-new' : null, notePath: '' }),
+    };
+  }
+  if (target.includes('/generate')) {
+    return {
+      ok: true,
+      json: async () => ({
+        ok: true,
+        sessionId: 'session-new',
+        target: 'C:\\courses\\测试课程\\测试课程-选摘笔记-11-08-1200.md',
+      }),
     };
   }
   return { ok: true, json: async () => overviewPayload };
@@ -407,6 +446,63 @@ if (!cwText.includes('讲义.pdf')) throw new Error('courseware view missed a ne
 if (!cwText.includes('[generate]')) throw new Error('courseware view did not render the generate button');
 if (!cwText.includes('[back]')) throw new Error('courseware view has no way back');
 if (!cwText.includes('[selectAll]')) throw new Error('courseware view has no select-all');
+
+// Browsing must not touch the Workspace registry: open the course that has no
+// project yet and confirm nothing was registered just to look at its files.
+const backFromCourseware = findByText(courseware, '[back]');
+if (backFromCourseware === undefined) throw new Error('courseware view has no back button');
+backFromCourseware.props.onClick();
+stateCursor = 0;
+const freshList = expand(courseMain.render({}));
+// The session-less course is last in the list: 空课程 and 无会话课程 both show
+// "new project", so take the second one.
+const freshOpen = findByText(freshList, '[createProject]', 'button', 1);
+if (freshOpen === undefined) throw new Error('course without a project has no open button');
+freshOpen.props.onClick();
+stateCursor = 0;
+const freshTree = expand(courseMain.render({}));
+const freshTexts = [];
+walk(freshTree, freshTexts);
+if (!freshTexts.join(' / ').includes('第2讲.pptx')) {
+  throw new Error('course without a project did not list its courseware');
+}
+if (workspaceCreates.length !== 0) {
+  throw new Error(`opening a course created a workspace: ${workspaceCreates.join(', ')}`);
+}
+if (openedWorkspaces.length !== 0) {
+  throw new Error('opening a course navigated into a workspace');
+}
+
+// Asking for real work is the point where a project may be created.
+// Select via "select all": the ticked set is then derived from the file list
+// alone, so the assertion cannot be thrown off by leftover render state.
+const selectAllButton = findByText(freshTree, '[selectAll]');
+if (selectAllButton === undefined) throw new Error('courseware view rendered no select-all');
+selectAllButton.props.onClick();
+stateCursor = 0;
+const tickedTree = expand(courseMain.render({}));
+const generateButton = findByText(tickedTree, '[generate]');
+if (generateButton === undefined) throw new Error('generate button missing after ticking a file');
+generateButton.props.onClick();
+await new Promise((resolve) => setTimeout(resolve, 120));
+
+if (workspaceCreates.length !== 1) {
+  throw new Error(`generate should create exactly one workspace, got ${workspaceCreates.length}`);
+}
+if (workspaceCreates[0] !== 'C:\\courses\\无会话课程') {
+  throw new Error(`workspace was created for the wrong path: ${workspaceCreates[0]}`);
+}
+const generatePost = fetchCalls.find(
+  (call) => String(call.url).includes('/generate') && call.init && call.init.method === 'POST',
+);
+if (generatePost === undefined) throw new Error('generate never posted to the Host');
+const posted = JSON.parse(generatePost.init.body);
+if (posted.coursePath !== 'C:\\courses\\无会话课程') {
+  throw new Error('generate posted the wrong course path');
+}
+if (!Array.isArray(posted.files) || posted.files.length !== 1) {
+  throw new Error(`generate posted the wrong file list: ${JSON.stringify(posted)}`);
+}
 
 console.log('sidebar ids    :', sidebars.map((item) => item.definition.id).join(', '));
 console.log('main keys      :', mains.map((item) => item.definition.key).join(', '));
