@@ -21,6 +21,7 @@ course-specific — point it at any folder where each subfolder is one course.
 | | |
 |---|---|
 | **Course panel** | Sidebar icon (graduation cap). Cards show courseware count, subfolders, last update and the 5 newest files. One click enters a course. |
+| **Folder filter** | Every folder you add becomes a chip above the grid. Click one to list only that folder's courses; click again or **全部** to see everything. Courses added one by one stay visible. |
 | **Pick-and-generate** | Inside a course, tick the exact slides you want and generate a note — the model only reads those files, not the whole folder. |
 | **Final review** | The `期末复习` button builds a summary **plus a problem set with full solutions**: questions already in your slides, past exam papers found in the folder, and predicted questions. |
 | **Notes view** | Second tab lists every generated deliverable grouped by course; click one to preview it in the right-hand sidebar. |

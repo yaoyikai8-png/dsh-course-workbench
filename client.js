@@ -155,6 +155,30 @@ window.__ModuleLoader__.load({
       return encodeURIComponent(segment).replace(/%3A/gi, ':');
     }
 
+    /** Compare two folders the way the Host does: separators and case ignored. */
+    function normalizePathKey(value) {
+      return String(value || '')
+        .replace(/[\\/]+/g, '\\')
+        .replace(/\\+$/, '')
+        .toLowerCase();
+    }
+
+    /** True when `candidate` is `root` itself or lives inside it. */
+    function isUnderRoot(root, candidate) {
+      const base = normalizePathKey(root);
+      if (base.length === 0) return true;
+      const path = normalizePathKey(candidate);
+      return path === base || path.startsWith(base + '\\');
+    }
+
+    /** Last path segment, used as the chip label. */
+    function lastSegment(value) {
+      const parts = String(value || '')
+        .replace(/[\\/]+$/, '')
+        .split(/[\\/]/);
+      return parts[parts.length - 1] || String(value || '');
+    }
+
     /**
      * Build the `dsh-resource://` address the right sidebar opens.
      * Mirrors the Host-side file address format used by the shipped previews.
@@ -196,6 +220,8 @@ window.__ModuleLoader__.load({
       skillAssignName: '作业助手',
       skillAssignHint: '「用 course-assignment 帮我完成这次的作业/报告」',
       noCourses: '课程目录为空',
+      allRoots: '全部',
+      noCoursesInRoot: '这个目录下还没有课程',
       navMaterials: '课件',
       pickerTitle: '课件笔记',
       pickerHint: '勾选课件 → 只读选中的文件生成笔记',
@@ -270,6 +296,8 @@ window.__ModuleLoader__.load({
       skillAssignName: 'Assignments',
       skillAssignHint: '"course-assignment: help me with this homework/report"',
       noCourses: 'No courses found',
+      allRoots: 'All',
+      noCoursesInRoot: 'No courses in this folder yet',
       navMaterials: 'Materials',
       pickerTitle: 'Courseware notes',
       pickerHint: 'Pick slides, then generate notes from exactly those files',
@@ -670,6 +698,28 @@ window.__ModuleLoader__.load({
         padding: '2px 8px',
         maxWidth: '100%',
         overflow: 'hidden',
+        cursor: 'pointer',
+        background: 'transparent',
+      },
+      // The chip whose courses are currently listed.
+      rootChipActive: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        fontSize: 11,
+        color: 'var(--dsw-alias-label-primary)',
+        border: '1px solid var(--dsw-alias-brand-primary, #4f46e5)',
+        borderRadius: 999,
+        padding: '2px 8px',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        background: 'var(--dsw-alias-bg-l2, rgba(79, 70, 229, 0.12))',
+      },
+      rootName: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
       },
       chipClose: {
         border: 'none',
@@ -803,12 +853,31 @@ window.__ModuleLoader__.load({
       const [activeMode, setActiveMode] = React.useState('notes');
       const [rootsOpen, setRootsOpen] = React.useState(false);
       const [rootDraft, setRootDraft] = React.useState('');
+      // Which root the course grid is filtered to; '' means every root.
+      const [activeRoot, setActiveRoot] = React.useState('');
       const [picking, setPicking] = React.useState(false);
       const [view, setView] = React.useState('courses');
 
       const courses = (state.data && state.data.courses) || [];
       const roots = (state.data && state.data.roots) || [];
       const active = courses.find((course) => course.path === activePath);
+
+      /**
+       * Courses belonging to the selected folder, or all of them.
+       *
+       * Courses added one by one live outside every root, so they stay visible
+       * no matter which folder is selected — otherwise the only way to reach
+       * them would be to switch the filter off.
+       */
+      const selectedRoot = roots.find(
+        (root) => normalizePathKey(root.path) === normalizePathKey(activeRoot),
+      );
+      const visibleCourses =
+        selectedRoot === undefined
+          ? courses
+          : courses.filter(
+              (course) => isUnderRoot(selectedRoot.path, course.path) || course.extra === true,
+            );
 
       /** Pick one folder in the OS chooser and add it to the course list. */
       const addCourse = () => {
@@ -974,18 +1043,42 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { style: s.rootsRow },
+          h(
+            'button',
+            {
+              key: '__all__',
+              style: activeRoot === '' ? s.rootChipActive : s.rootChip,
+              onClick: () => setActiveRoot(''),
+            },
+            tr(t, 'allRoots'),
+          ),
           roots.map((root) =>
             h(
-              'span',
-              { key: root.path, style: s.rootChip, title: root.path },
-              root.path,
+              'div',
+              {
+                key: root.path,
+                style:
+                  normalizePathKey(root.path) === normalizePathKey(activeRoot)
+                    ? s.rootChipActive
+                    : s.rootChip,
+                title: root.path,
+                // Click to list only this folder's courses; click again to clear.
+                onClick: () =>
+                  setActiveRoot((prev) =>
+                    normalizePathKey(prev) === normalizePathKey(root.path) ? '' : root.path,
+                  ),
+              },
+              h('span', { style: s.rootName }, lastSegment(root.path)),
               root.removable
                 ? h(
                     'button',
                     {
                       style: s.chipClose,
                       title: tr(t, 'removeRoot'),
-                      onClick: () => editRoot('remove', root.path),
+                      onClick: (event) => {
+                        event.stopPropagation();
+                        editRoot('remove', root.path);
+                      },
                     },
                     '×',
                   )
@@ -1024,11 +1117,11 @@ window.__ModuleLoader__.load({
               ),
             )
           : null,
-        state.data && state.data.courses && state.data.courses.length > 0
+        visibleCourses.length > 0
           ? h(
               'div',
               { style: s.grid },
-              state.data.courses.map((course) =>
+              visibleCourses.map((course) =>
                 h(CourseCard, {
                   key: course.path,
                   course,
@@ -1041,8 +1134,12 @@ window.__ModuleLoader__.load({
               ),
             )
           : null,
-        state.data && state.data.courses && state.data.courses.length === 0
-          ? h('div', { style: s.message }, tr(t, 'noCourses'))
+        state.data && visibleCourses.length === 0
+          ? h(
+              'div',
+              { style: s.message },
+              selectedRoot === undefined ? tr(t, 'noCourses') : tr(t, 'noCoursesInRoot'),
+            )
           : null,
         state.data
           ? h('div', { style: s.statusLine }, tr(t, 'updatedAt', formatDateTime(state.data.generatedAt, locale)))

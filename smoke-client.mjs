@@ -211,6 +211,36 @@ const overviewPayload = {
         latestFiles: [{ name: '第2讲.pptx', mtime: '2026-11-03T00:00:00.000Z', sizeKB: 88 }],
         lastModified: '2026-11-03T00:00:00.000Z',
       },
+      {
+        // Lives under the second root, so the chip filter can hide it.
+        name: '外部课程',
+        path: 'C:\\courses-extra\\外部课程',
+        courseFileCount: 1,
+        files: [
+          {
+            name: '第3讲.pptx',
+            path: 'C:\\courses-extra\\外部课程\\第3讲.pptx',
+            dir: '',
+            ext: 'pptx',
+            mtime: '2026-11-04T00:00:00.000Z',
+            sizeKB: 64,
+          },
+        ],
+        subfolders: [],
+        latestFiles: [],
+        lastModified: '2026-11-04T00:00:00.000Z',
+      },
+      {
+        // Added on its own, outside every root: must survive any filter.
+        name: '单独添加',
+        path: 'C:\\elsewhere\\单独添加',
+        extra: true,
+        courseFileCount: 0,
+        files: [],
+        subfolders: [],
+        latestFiles: [],
+        lastModified: '',
+      },
   ],
 };
 
@@ -345,7 +375,7 @@ if (!icon || icon.type !== 'svg') throw new Error('sidebar icon did not render a
 const list = await renderPanel(courseMain);
 if (!list.text.includes('测试课程')) throw new Error('course card did not render the course name');
 if (!list.text.includes('空课程')) throw new Error('second course card missing');
-if (!list.text.includes('C:\\courses-extra')) {
+if (!list.text.includes('courses-extra')) {
   throw new Error('course list did not render the extra course root');
 }
 if (!list.text.includes('[openCourseware]')) {
@@ -355,7 +385,37 @@ if (!list.text.includes('[createProject]')) {
   throw new Error('course without a project did not offer "new project"');
 }
 
-// Switch to the Notes tab: courses are listed with their note counts.
+// Root chips act as a folder filter: clicking one lists only its courses, and
+// a course added on its own stays visible whichever folder is selected.
+const extraChip = findByText(list.tree, 'courses-extra', 'div');
+if (extraChip === undefined) throw new Error('extra root chip is not clickable');
+extraChip.props.onClick();
+stateCursor = 0;
+const filteredTree = expand(courseMain.render({}));
+const filteredTexts = [];
+walk(filteredTree, filteredTexts);
+const filteredText = filteredTexts.join(' / ');
+if (filteredText.includes('测试课程')) {
+  throw new Error('filtering by courses-extra still showed a course from another root');
+}
+if (!filteredText.includes('外部课程')) {
+  throw new Error('filtering by courses-extra hid its own course');
+}
+if (!filteredText.includes('单独添加')) {
+  throw new Error('filtering hid the individually added course');
+}
+
+// Clicking the active chip again clears the filter.
+const allChip = findByText(filteredTree, '[allRoots]');
+if (allChip === undefined) throw new Error('no "all folders" chip');
+allChip.props.onClick();
+stateCursor = 0;
+const clearedTree = expand(courseMain.render({}));
+const clearedTexts = [];
+walk(clearedTree, clearedTexts);
+if (!clearedTexts.join(' / ').includes('测试课程')) {
+  throw new Error('clearing the filter did not bring the other courses back');
+}
 const notesTab = findByText(list.tree, '[tabNotes]');
 if (notesTab === undefined) throw new Error('notes tab button not found');
 notesTab.props.onClick();
